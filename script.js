@@ -1,11 +1,17 @@
 // Compiler-like DFA Generator with Lexer, Parser, Code Generator, and Simulator
 
+
+//NEGI
+
 // Get CSS variables for colors
 const root = document.documentElement;
 const stateColor = getComputedStyle(root).getPropertyValue('--state-color').trim();
 const pathColor = getComputedStyle(root).getPropertyValue('--path-color').trim();
 const acceptColor = getComputedStyle(root).getPropertyValue('--accept-color').trim();
 const arrowColor = getComputedStyle(root).getPropertyValue('--arrow-color').trim();
+
+
+//NAVEEN
 
 // Lexer: Tokenizes the input pattern
 function lexer(input) {
@@ -22,6 +28,8 @@ function lexer(input) {
     }
     return tokens;
 }
+
+//NAVEEN
 
 // Parser: Parses tokens into an AST
 function parser(tokens) {
@@ -49,6 +57,8 @@ function parser(tokens) {
     return null;
 }
 
+//NAVEEN
+
 // Code Generator: Builds DFA from AST
 function codeGenerator(ast) {
     if (!ast) return null;
@@ -71,6 +81,9 @@ function codeGenerator(ast) {
     }
     return null;
 }
+
+
+//DINESH
 
 // Helper functions for DFA building
 function buildStartWithDFA(prefix, alphabet) {
@@ -122,6 +135,8 @@ function buildEndsWithDFA(suffix, alphabet) {
     return dfa;
 }
 
+//NAVEEN
+
 function buildContainDFA(pattern, alphabet) {
     let len = pattern.length;
     let dfa = {};
@@ -149,6 +164,7 @@ function buildContainDFA(pattern, alphabet) {
     return dfa;
 }
 
+//HIMANSHU
 function buildOnlyCombinationDFA(alphabet) {
     let dfa = {};
     dfa["q0"] = {};
@@ -162,6 +178,8 @@ function buildOnlyCombinationDFA(alphabet) {
     dfa["q0"]["else"] = "qReject";
     return dfa;
 }
+
+//ANAS
 
 // Simulator: Tests a string against the DFA
 function simulateDFA(dfa, input) {
@@ -200,6 +218,8 @@ function simulateWithPath(dfa, input) {
     return { result, path, transitions };
 }
 
+//HIMANSHU
+
 // Main process function
 function processPattern() {
     let desc = document.getElementById("patternInput").value.toLowerCase();
@@ -229,6 +249,8 @@ function processPattern() {
     displayNFATable(dfa); // Since DFA is NFA
     drawDFA(dfa);
 }
+
+//ANAS
 
 // Function to simulate
 function simulate() {
@@ -266,6 +288,8 @@ function simulate() {
     animateSimulation(dfa, path, input, transitions);
 }
 
+//DINESH
+
 // Display DFA table
 function displayDFATable(dfa) {
     let symbols = new Set();
@@ -287,6 +311,8 @@ function displayDFATable(dfa) {
 
     document.getElementById("dfaTable").innerHTML = table;
 }
+
+//DINESH
 
 // Display NFA table (same as DFA since DFA is NFA)
 function displayNFATable(dfa) {
@@ -316,6 +342,8 @@ function displayNFATable(dfa) {
 
     document.getElementById("nfaTable").innerHTML = table;
 }
+
+//ANAS
 
 // Draw simulated DFA with path highlighted
 function drawSimulatedDFA(dfa, path, transitions, step) {

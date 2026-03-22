@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dynamic DFA Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>Dynamic DFA Generator</h1>
+
+    <input type="text" id="patternInput" placeholder="Enter pattern (start with abc, ends with 123, contain xyz, only combination of abc)">
+    <button onclick="processPattern()">Generate DFA</button>
+
+    <div id="dfaSection">
+        <h2>DFA Transition Table</h2>
+        <div id="dfaTable"></div>
+    </div>
+
+    <div id="nfaSection">
+        <h2>NFA Transition Table</h2>
+        <div id="nfaTable"></div>
+    </div>
+
+    <div id="diagramSection">
+        <h2>DFA Diagram</h2>
+        <canvas id="dfaCanvas"></canvas>
+    </div>
+
+    <div id="simulationSection">
+        <h2>Simulation</h2>
+        <input type="text" id="testInput" placeholder="Enter string to test">
+        <button onclick="simulate()">Test String</button>
+        <div id="simulationOutput"></div>
+        <div id="simulationSteps"></div>
+        <div id="simulatedDFASection">
+            <h3>Simulated DFA Path</h3>
+            <canvas id="simulatedDFACanvas"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

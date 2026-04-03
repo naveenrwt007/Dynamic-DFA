@@ -9,6 +9,11 @@ const stateColor = getComputedStyle(root).getPropertyValue('--state-color').trim
 const pathColor = getComputedStyle(root).getPropertyValue('--path-color').trim();
 const acceptColor = getComputedStyle(root).getPropertyValue('--accept-color').trim();
 const arrowColor = getComputedStyle(root).getPropertyValue('--arrow-color').trim();
+const stateNameColor = getComputedStyle(root).getPropertyValue('--state-name-color').trim();
+const arrowHeadColor = getComputedStyle(root).getPropertyValue('--arrow-head-color').trim();
+const arrowLabelColor = getComputedStyle(root).getPropertyValue('--arrow-label-color').trim();
+const circleFillColor = getComputedStyle(root).getPropertyValue('--circle-fill-color').trim();
+const transitionLabelColor = getComputedStyle(root).getPropertyValue('--transition-label-color').trim();
 
 
 //NAVEEN
@@ -18,7 +23,7 @@ function lexer(input) {
     const tokens = [];
     const words = input.toLowerCase().split(/\s+/);
     for (let word of words) {
-        if (['start', 'with', 'ends', 'contain', 'only', 'combination', 'of', 'length', 'is', 'even', 'odd', 'a', 'b', 'and', 'will', 'be'].includes(word)) {
+        if (['start', 'with', 'ends', 'contain', 'only', 'combination', 'of', 'length', 'is', 'even', 'odd', 'a', 'b', 'and', 'will', 'be', 'mod'].includes(word)) {
             tokens.push({ type: 'keyword', value: word });
         } else if (/^[a-zA-Z0-9]+$/.test(word)) {
             tokens.push({ type: 'string', value: word });
@@ -130,6 +135,38 @@ function parser(tokens) {
         consume('keyword');
         consume('keyword');
         return { type: 'count_a_b_even' };
+    } else if (peekType() === 'keyword' && peek() === 'length' && peekType(1) === 'keyword' && peek(1) === 'is' && peekType(2) === 'keyword' && peek(2) === 'mod' && peekType(3) === 'string' && /^\d+$/.test(peek(3))) {
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        const mod = parseInt(consume('string'));
+        return { type: 'length_mod', mod: mod };
+    } else if (peekType() === 'keyword' && peek() === 'length' && peekType(1) === 'keyword' && peek(1) === 'of' && peekType(2) === 'keyword' && peek(2) === 'a' && peekType(3) === 'keyword' && peek(3) === 'is' && peekType(4) === 'keyword' && peek(4) === 'mod' && peekType(5) === 'string' && /^\d+$/.test(peek(5))) {
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        const mod = parseInt(consume('string'));
+        return { type: 'count_a_mod', mod: mod };
+    } else if (peekType() === 'keyword' && peek() === 'length' && peekType(1) === 'keyword' && peek(1) === 'of' && peekType(2) === 'keyword' && peek(2) === 'b' && peekType(3) === 'keyword' && peek(3) === 'is' && peekType(4) === 'keyword' && peek(4) === 'mod' && peekType(5) === 'string' && /^\d+$/.test(peek(5))) {
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        const mod = parseInt(consume('string'));
+        return { type: 'count_b_mod', mod: mod };
+    } else if (peekType() === 'keyword' && peek() === 'length' && peekType(1) === 'keyword' && peek(1) === 'of' && peekType(2) === 'keyword' && peek(2) === 'a' && peekType(3) === 'keyword' && peek(3) === 'and' && peekType(4) === 'keyword' && peek(4) === 'b' && peekType(5) === 'keyword' && peek(5) === 'is' && peekType(6) === 'keyword' && peek(6) === 'mod' && peekType(7) === 'string' && /^\d+$/.test(peek(7))) {
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        const mod = parseInt(consume('string'));
+        return { type: 'count_a_b_mod', mod: mod };
     }
     return null;
 }
@@ -143,9 +180,9 @@ function codeGenerator(ast) {
     let alphabet;
     if (ast.type === 'only_combination') {
         alphabet = ast.alphabet;
-    } else if (['count_a_even', 'count_a_odd', 'count_b_even', 'count_b_odd', 'count_a_b_even'].includes(ast.type)) {
+    } else if (['count_a_even', 'count_a_odd', 'count_b_even', 'count_b_odd', 'count_a_b_even', 'count_a_mod', 'count_b_mod', 'count_a_b_mod'].includes(ast.type)) {
         alphabet = ['a', 'b'];
-    } else if (['length_even', 'length_odd', 'length_zero', 'length_one'].includes(ast.type)) {
+    } else if (['length_even', 'length_odd', 'length_zero', 'length_one', 'length_mod'].includes(ast.type)) {
         alphabet = [];
         for (let i = 32; i <= 126; i++) {
             alphabet.push(String.fromCharCode(i));
@@ -180,6 +217,14 @@ function codeGenerator(ast) {
         return buildCountBOddDFA(alphabet);
     } else if (ast.type === 'count_a_b_even') {
         return buildCountABEvenDFA(alphabet);
+    } else if (ast.type === 'length_mod') {
+        return buildLengthModDFA(ast.mod, alphabet);
+    } else if (ast.type === 'count_a_mod') {
+        return buildCountAModDFA(ast.mod, alphabet);
+    } else if (ast.type === 'count_b_mod') {
+        return buildCountBModDFA(ast.mod, alphabet);
+    } else if (ast.type === 'count_a_b_mod') {
+        return buildCountABModDFA(ast.mod, alphabet);
     }
     return null;
 }
@@ -188,6 +233,7 @@ function codeGenerator(ast) {
 //DINESH
 
 // Helper functions for DFA building
+// Builds DFA for strings starting with a specific prefix
 function buildStartWithDFA(prefix, alphabet) {
     let dfa = {};
     for (let i = 0; i <= prefix.length; i++) {
@@ -211,6 +257,7 @@ function buildStartWithDFA(prefix, alphabet) {
     return dfa;
 }
 
+// Builds DFA for strings ending with a specific suffix
 function buildEndsWithDFA(suffix, alphabet) {
     let dfa = {};
     let len = suffix.length;
@@ -239,6 +286,7 @@ function buildEndsWithDFA(suffix, alphabet) {
 
 //NAVEEN
 
+// Builds DFA for strings containing a specific pattern
 function buildContainDFA(pattern, alphabet) {
     let len = pattern.length;
     let dfa = {};
@@ -267,6 +315,7 @@ function buildContainDFA(pattern, alphabet) {
 }
 
 //HIMANSHU
+// Builds DFA for strings using only specified characters
 function buildOnlyCombinationDFA(alphabet) {
     let dfa = {};
     dfa["q0"] = {};
@@ -283,6 +332,7 @@ function buildOnlyCombinationDFA(alphabet) {
 
 // New functions for length and count conditions
 
+// Builds DFA for strings with even length
 function buildLengthEvenDFA(alphabet) {
     let dfa = {};
     dfa["q0"] = {}; // even length
@@ -300,6 +350,7 @@ function buildLengthEvenDFA(alphabet) {
     return dfa;
 }
 
+// Builds DFA for strings with odd length
 function buildLengthOddDFA(alphabet) {
     let dfa = {};
     dfa["q0"] = {}; // even length
@@ -317,6 +368,7 @@ function buildLengthOddDFA(alphabet) {
     return dfa;
 }
 
+// Builds DFA for empty strings only
 function buildLengthZeroDFA(alphabet) {
     let dfa = {};
     dfa["q0"] = {};
@@ -331,6 +383,7 @@ function buildLengthZeroDFA(alphabet) {
     return dfa;
 }
 
+// Builds DFA for strings with length exactly 1
 function buildLengthOneDFA(alphabet) {
     let dfa = {};
     dfa["q0"] = {};
@@ -348,6 +401,7 @@ function buildLengthOneDFA(alphabet) {
     return dfa;
 }
 
+// Builds DFA for strings with even count of 'a' characters
 function buildCountAEvenDFA(alphabet) {
     let dfa = {};
     dfa["q0"] = {}; // even count of a
@@ -373,6 +427,7 @@ function buildCountAEvenDFA(alphabet) {
     return dfa;
 }
 
+// Builds DFA for strings with odd count of 'a' characters
 function buildCountAOddDFA(alphabet) {
     let dfa = {};
     dfa["q0"] = {}; // even count of a
@@ -398,6 +453,7 @@ function buildCountAOddDFA(alphabet) {
     return dfa;
 }
 
+// Builds DFA for strings with even count of 'b' characters
 function buildCountBEvenDFA(alphabet) {
     let dfa = {};
     dfa["q0"] = {}; // even count of b
@@ -423,6 +479,7 @@ function buildCountBEvenDFA(alphabet) {
     return dfa;
 }
 
+// Builds DFA for strings with odd count of 'b' characters
 function buildCountBOddDFA(alphabet) {
     let dfa = {};
     dfa["q0"] = {}; // even count of b
@@ -448,6 +505,7 @@ function buildCountBOddDFA(alphabet) {
     return dfa;
 }
 
+// Builds DFA for strings with even total count of 'a' and 'b' characters
 function buildCountABEvenDFA(alphabet) {
     let dfa = {};
     dfa["q0"] = {}; // even count of a and b
@@ -470,9 +528,89 @@ function buildCountABEvenDFA(alphabet) {
     return dfa;
 }
 
+// New functions for mod conditions
+
+// Builds DFA for strings where length is divisible by mod
+function buildLengthModDFA(mod, alphabet) {
+    let dfa = {};
+    for (let i = 0; i < mod; i++) {
+        dfa["q" + i] = {};
+        alphabet.forEach(c => dfa["q" + i][c] = "q" + ((i + 1) % mod));
+        dfa["q" + i]["else"] = "qReject";
+    }
+    dfa["qReject"] = {};
+    alphabet.forEach(c => dfa["qReject"][c] = "qReject");
+    dfa["qReject"]["else"] = "qReject";
+    dfa["q0"].accept = true;
+    return dfa;
+}
+
+// Builds DFA for strings where count of 'a' is divisible by mod
+function buildCountAModDFA(mod, alphabet) {
+    let dfa = {};
+    for (let i = 0; i < mod; i++) {
+        dfa["q" + i] = {};
+        alphabet.forEach(c => {
+            if (c === 'a') {
+                dfa["q" + i][c] = "q" + ((i + 1) % mod);
+            } else {
+                dfa["q" + i][c] = "q" + i;
+            }
+        });
+        dfa["q" + i]["else"] = "qReject";
+    }
+    dfa["qReject"] = {};
+    alphabet.forEach(c => dfa["qReject"][c] = "qReject");
+    dfa["qReject"]["else"] = "qReject";
+    dfa["q0"].accept = true;
+    return dfa;
+}
+
+// Builds DFA for strings where count of 'b' is divisible by mod
+function buildCountBModDFA(mod, alphabet) {
+    let dfa = {};
+    for (let i = 0; i < mod; i++) {
+        dfa["q" + i] = {};
+        alphabet.forEach(c => {
+            if (c === 'b') {
+                dfa["q" + i][c] = "q" + ((i + 1) % mod);
+            } else {
+                dfa["q" + i][c] = "q" + i;
+            }
+        });
+        dfa["q" + i]["else"] = "qReject";
+    }
+    dfa["qReject"] = {};
+    alphabet.forEach(c => dfa["qReject"][c] = "qReject");
+    dfa["qReject"]["else"] = "qReject";
+    dfa["q0"].accept = true;
+    return dfa;
+}
+
+// Builds DFA for strings where total count of 'a' and 'b' is divisible by mod
+function buildCountABModDFA(mod, alphabet) {
+    let dfa = {};
+    for (let i = 0; i < mod; i++) {
+        dfa["q" + i] = {};
+        alphabet.forEach(c => {
+            if (c === 'a' || c === 'b') {
+                dfa["q" + i][c] = "q" + ((i + 1) % mod);
+            } else {
+                dfa["q" + i][c] = "q" + i;
+            }
+        });
+        dfa["q" + i]["else"] = "qReject";
+    }
+    dfa["qReject"] = {};
+    alphabet.forEach(c => dfa["qReject"][c] = "qReject");
+    dfa["qReject"]["else"] = "qReject";
+    dfa["q0"].accept = true;
+    return dfa;
+}
+
 //ANAS
 
-// Simulator: Tests a string against the DFA
+// Simulator: Tests a string against the DFA and returns true if accepted
 function simulateDFA(dfa, input) {
     let state = "q0";
     for (let c of input) {
@@ -487,7 +625,7 @@ function simulateDFA(dfa, input) {
     return dfa[state] && dfa[state].accept;
 }
 
-// Simulate with path
+// Simulates string against DFA and returns path and transitions taken
 function simulateWithPath(dfa, input) {
     let state = "q0";
     let path = [state];
@@ -511,7 +649,7 @@ function simulateWithPath(dfa, input) {
 
 //HIMANSHU
 
-// Main process function
+// Processes pattern input and generates DFA with visualization
 function processPattern() {
     let desc = document.getElementById("patternInput").value.toLowerCase();
 
@@ -527,7 +665,7 @@ function processPattern() {
     displayParser(ast);
 
     if (!ast) {
-        alert("Pattern not supported! Use: start with <string>, ends with <string>, contain <string>, only combination of <string>, length is even/odd/0/1, length of a is even/odd, length of b is even/odd, length of a and b is even, length will be even");
+        alert("Pattern not supported! Use: start with <string>, ends with <string>, contain <string>, only combination of <string>, length is even/odd/0/1/mod <n>, length of a is even/odd/mod <n>, length of b is even/odd/mod <n>, length of a and b is even/mod <n>, length will be even");
         return;
     }
 
@@ -544,6 +682,7 @@ function processPattern() {
     drawDFA(dfa);
 }
 
+// Displays lexer tokens in formatted text
 function displayLexer(tokens) {
     const output = tokens.length
         ? tokens.map(token => `${token.type}: ${token.value}`).join('\n')
@@ -551,6 +690,7 @@ function displayLexer(tokens) {
     document.getElementById('lexerOutput').innerText = output;
 }
 
+// Displays parser AST in JSON format
 function displayParser(ast) {
     const output = ast ? JSON.stringify(ast, null, 2) : 'Invalid syntax or unsupported pattern.';
     document.getElementById('parserOutput').innerText = output;
@@ -558,7 +698,7 @@ function displayParser(ast) {
 
 //ANAS
 
-// Function to simulate
+// Runs simulation test and displays result with step-by-step animation
 function simulate() {
     const input = document.getElementById("testInput").value;
     const desc = document.getElementById("patternInput").value.toLowerCase();
@@ -577,9 +717,9 @@ function simulate() {
     let alphabet;
     if (ast.type === 'only_combination') {
         alphabet = ast.alphabet;
-    } else if (['count_a_even', 'count_a_odd', 'count_b_even', 'count_b_odd', 'count_a_b_even'].includes(ast.type)) {
+    } else if (['count_a_even', 'count_a_odd', 'count_b_even', 'count_b_odd', 'count_a_b_even', 'count_a_mod', 'count_b_mod', 'count_a_b_mod'].includes(ast.type)) {
         alphabet = ['a', 'b'];
-    } else if (['length_even', 'length_odd', 'length_zero', 'length_one'].includes(ast.type)) {
+    } else if (['length_even', 'length_odd', 'length_zero', 'length_one', 'length_mod'].includes(ast.type)) {
         alphabet = [];
         for (let i = 32; i <= 126; i++) {
             alphabet.push(String.fromCharCode(i));
@@ -608,7 +748,7 @@ function simulate() {
 
 //DINESH
 
-// Display DFA table
+// Renders DFA transition table as HTML
 function displayDFATable(dfa) {
     let symbols = new Set();
     for (let state in dfa) {
@@ -632,7 +772,7 @@ function displayDFATable(dfa) {
 
 //DINESH
 
-// Display NFA table (same as DFA since DFA is NFA)
+// Renders NFA transition table as HTML
 function displayNFATable(dfa) {
     let symbols = new Set();
     for (let state in dfa) {
@@ -663,7 +803,7 @@ function displayNFATable(dfa) {
 
 //ANAS
 
-// Draw simulated DFA with path highlighted
+// Draws DFA diagram with simulation path highlighted
 function drawSimulatedDFA(dfa, path, transitions, step) {
     const canvas = document.getElementById("simulatedDFACanvas");
     canvas.width = 900;
@@ -694,8 +834,9 @@ function drawSimulatedDFA(dfa, path, transitions, step) {
         ctx.strokeStyle = isInPath ? pathColor : stateColor; // Red for path, cyan for others
         ctx.lineWidth = isInPath ? 4 : 2;
         ctx.stroke();
-        ctx.fillStyle = "white";
-        ctx.fillText(state, x - 15, y + 5);
+        // Draw state name outside the circle
+        ctx.fillStyle = stateNameColor;
+        ctx.fillText(state, x - 15, y + 50);
 
         if (dfa[state].accept) {
             ctx.beginPath();
@@ -733,14 +874,14 @@ function drawSimulatedDFA(dfa, path, transitions, step) {
             if (i === step) {
                 const midX = (fromPos.x + toPos.x) / 2;
                 const midY = (fromPos.y + toPos.y) / 2;
-                ctx.fillStyle = "#fefefe";
+                ctx.fillStyle = transitionLabelColor;
                 ctx.fillText(transitions[i].symbol, midX, midY - 10);
             }
         }
     }
 }
 
-// Animate step-by-step simulation
+// Animates step-by-step simulation with timed canvas updates
 function animateSimulation(dfa, path, input, transitions) {
     const stepsEl = document.getElementById("simulationSteps");
     stepsEl.innerHTML = "";
@@ -765,7 +906,7 @@ function animateSimulation(dfa, path, input, transitions) {
     }
 }
 
-// Draw DFA diagram
+// Draws complete DFA diagram on canvas with states and transitions
 function drawDFA(dfa) {
     const canvas = document.getElementById("dfaCanvas");
     canvas.width = 900;
@@ -793,8 +934,9 @@ function drawDFA(dfa) {
         ctx.arc(x,y,30,0,2*Math.PI);
         ctx.strokeStyle = stateColor;
         ctx.stroke();
-        ctx.fillStyle = "white";
-        ctx.fillText(state,x-15,y+5);
+        // Draw state name outside the circle
+        ctx.fillStyle = stateNameColor;
+        ctx.fillText(state, x - 15, y + 50);
 
         if(dfa[state].accept){
             ctx.beginPath();
@@ -817,7 +959,7 @@ function drawDFA(dfa) {
     });
 }
 
-// draw arrow
+// Draws arrow with arrowhead and label between two states
 function drawArrow(ctx, fromX, fromY, toX, toY, label){
     const headLen=10;
     const angle=Math.atan2(toY-fromY,toX-fromX);
@@ -833,9 +975,9 @@ function drawArrow(ctx, fromX, fromY, toX, toY, label){
     ctx.lineTo(toX-headLen*Math.cos(angle-Math.PI/6),toY-headLen*Math.sin(angle-Math.PI/6));
     ctx.lineTo(toX-headLen*Math.cos(angle+Math.PI/6),toY-headLen*Math.sin(angle+Math.PI/6));
     ctx.closePath();
-    ctx.fillStyle="#ff00ff";
+    ctx.fillStyle = arrowHeadColor;
     ctx.fill();
 
-    ctx.fillStyle="yellow";
+    ctx.fillStyle = arrowLabelColor;
     ctx.fillText(label,(fromX+toX)/2,(fromY+toY)/2-5);
 }

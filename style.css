@@ -43,6 +43,19 @@ table {
     margin: 20px auto;
     border-collapse: collapse;
     width: 70%;
+    border: 2px solid #00c6ff;
+}
+
+th, td {
+    border: 1px solid #00c6ff;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background: #0072ff;
+    color: white;
+    font-weight: bold;
 }
 
 pre {
@@ -77,6 +90,11 @@ canvas {
     --path-color: #ff0000;
     --accept-color: #00ff00;
     --arrow-color: #ff00ff;
+    --state-name-color: #000000;
+    --arrow-head-color: #ff00ff;
+    --arrow-label-color: #ffff00;
+    --circle-fill-color: #ffffff;
+    --transition-label-color: #fefefe;
 }
 
 canvas {

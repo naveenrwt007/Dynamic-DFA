@@ -14,6 +14,16 @@
     <input type="text" id="patternInput" placeholder="Enter pattern (start with abc, ends with 123, contain xyz, only combination of abc)">
     <button onclick="processPattern()">Generate DFA</button>
 
+    <div id="lexerSection">
+        <h2>Lexer Output</h2>
+        <pre id="lexerOutput">No tokens yet.</pre>
+    </div>
+
+    <div id="parserSection">
+        <h2>Parser Output</h2>
+        <pre id="parserOutput">No AST yet.</pre>
+    </div>
+
     <div id="dfaSection">
         <h2>DFA Transition Table</h2>
         <div id="dfaTable"></div>

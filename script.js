@@ -18,7 +18,7 @@ function lexer(input) {
     const tokens = [];
     const words = input.toLowerCase().split(/\s+/);
     for (let word of words) {
-        if (['start', 'with', 'ends', 'contain', 'only', 'combination', 'of'].includes(word)) {
+        if (['start', 'with', 'ends', 'contain', 'only', 'combination', 'of', 'length', 'is', 'even', 'odd', 'a', 'b', 'and', 'will', 'be'].includes(word)) {
             tokens.push({ type: 'keyword', value: word });
         } else if (/^[a-zA-Z0-9]+$/.test(word)) {
             tokens.push({ type: 'string', value: word });
@@ -34,6 +34,12 @@ function lexer(input) {
 // Parser: Parses tokens into an AST
 function parser(tokens) {
     let i = 0;
+    function peek(offset = 0) {
+        return tokens[i + offset] ? tokens[i + offset].value : null;
+    }
+    function peekType(offset = 0) {
+        return tokens[i + offset] ? tokens[i + offset].type : null;
+    }
     function consume(type) {
         if (i < tokens.length && tokens[i].type === type) {
             return tokens[i++].value;
@@ -41,18 +47,89 @@ function parser(tokens) {
         return null;
     }
 
-    if (consume('keyword') === 'start' && consume('keyword') === 'with') {
+    if (peekType() === 'keyword' && peek() === 'start' && peekType(1) === 'keyword' && peek(1) === 'with' && peekType(2) === 'string') {
+        consume('keyword');
+        consume('keyword');
         const str = consume('string');
-        if (str) return { type: 'start_with', string: str };
-    } else if (consume('keyword') === 'ends' && consume('keyword') === 'with') {
+        return { type: 'start_with', string: str };
+    } else if (peekType() === 'keyword' && peek() === 'ends' && peekType(1) === 'keyword' && peek(1) === 'with' && peekType(2) === 'string') {
+        consume('keyword');
+        consume('keyword');
         const str = consume('string');
-        if (str) return { type: 'ends_with', string: str };
-    } else if (consume('keyword') === 'contain') {
+        return { type: 'ends_with', string: str };
+    } else if (peekType() === 'keyword' && peek() === 'contain' && peekType(1) === 'string') {
+        consume('keyword');
         const str = consume('string');
-        if (str) return { type: 'contain', string: str };
-    } else if (consume('keyword') === 'only' && consume('keyword') === 'combination' && consume('keyword') === 'of') {
+        return { type: 'contain', string: str };
+    } else if (peekType() === 'keyword' && peek() === 'only' && peekType(1) === 'keyword' && peek(1) === 'combination' && peekType(2) === 'keyword' && peek(2) === 'of' && peekType(3) === 'string') {
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
         const str = consume('string');
-        if (str) return { type: 'only_combination', alphabet: str.split('') };
+        return { type: 'only_combination', alphabet: str.split('') };
+    } else if (peekType() === 'keyword' && peek() === 'length' && peekType(1) === 'keyword' && peek(1) === 'is' && peekType(2) === 'keyword' && peek(2) === 'even') {
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        return { type: 'length_even' };
+    } else if (peekType() === 'keyword' && peek() === 'length' && peekType(1) === 'keyword' && peek(1) === 'is' && peekType(2) === 'keyword' && peek(2) === 'odd') {
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        return { type: 'length_odd' };
+    } else if (peekType() === 'keyword' && peek() === 'length' && peekType(1) === 'keyword' && peek(1) === 'is' && peekType(2) === 'string' && peek(2) === '0') {
+        consume('keyword');
+        consume('keyword');
+        consume('string');
+        return { type: 'length_zero' };
+    } else if (peekType() === 'keyword' && peek() === 'length' && peekType(1) === 'keyword' && peek(1) === 'is' && peekType(2) === 'string' && peek(2) === '1') {
+        consume('keyword');
+        consume('keyword');
+        consume('string');
+        return { type: 'length_one' };
+    } else if (peekType() === 'keyword' && peek() === 'length' && peekType(1) === 'keyword' && peek(1) === 'of' && peekType(2) === 'keyword' && peek(2) === 'a' && peekType(3) === 'keyword' && peek(3) === 'is' && peekType(4) === 'keyword' && peek(4) === 'even') {
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        return { type: 'count_a_even' };
+    } else if (peekType() === 'keyword' && peek() === 'length' && peekType(1) === 'keyword' && peek(1) === 'of' && peekType(2) === 'keyword' && peek(2) === 'a' && peekType(3) === 'keyword' && peek(3) === 'is' && peekType(4) === 'keyword' && peek(4) === 'odd') {
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        return { type: 'count_a_odd' };
+    } else if (peekType() === 'keyword' && peek() === 'length' && peekType(1) === 'keyword' && peek(1) === 'of' && peekType(2) === 'keyword' && peek(2) === 'b' && peekType(3) === 'keyword' && peek(3) === 'is' && peekType(4) === 'keyword' && peek(4) === 'even') {
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        return { type: 'count_b_even' };
+    } else if (peekType() === 'keyword' && peek() === 'length' && peekType(1) === 'keyword' && peek(1) === 'of' && peekType(2) === 'keyword' && peek(2) === 'b' && peekType(3) === 'keyword' && peek(3) === 'is' && peekType(4) === 'keyword' && peek(4) === 'odd') {
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        return { type: 'count_b_odd' };
+    } else if (peekType() === 'keyword' && peek() === 'length' && peekType(1) === 'keyword' && peek(1) === 'will' && peekType(2) === 'keyword' && peek(2) === 'be' && peekType(3) === 'keyword' && peek(3) === 'even') {
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        return { type: 'length_even' };
+    } else if (peekType() === 'keyword' && peek() === 'length' && peekType(1) === 'keyword' && peek(1) === 'of' && peekType(2) === 'keyword' && peek(2) === 'a' && peekType(3) === 'keyword' && peek(3) === 'and' && peekType(4) === 'keyword' && peek(4) === 'b' && peekType(5) === 'keyword' && peek(5) === 'is' && peekType(6) === 'keyword' && peek(6) === 'even') {
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        consume('keyword');
+        return { type: 'count_a_b_even' };
     }
     return null;
 }
@@ -66,6 +143,13 @@ function codeGenerator(ast) {
     let alphabet;
     if (ast.type === 'only_combination') {
         alphabet = ast.alphabet;
+    } else if (['count_a_even', 'count_a_odd', 'count_b_even', 'count_b_odd', 'count_a_b_even'].includes(ast.type)) {
+        alphabet = ['a', 'b'];
+    } else if (['length_even', 'length_odd', 'length_zero', 'length_one'].includes(ast.type)) {
+        alphabet = [];
+        for (let i = 32; i <= 126; i++) {
+            alphabet.push(String.fromCharCode(i));
+        }
     } else {
         alphabet = [...new Set(ast.string.split(''))];
     }
@@ -78,6 +162,24 @@ function codeGenerator(ast) {
         return buildContainDFA(ast.string, alphabet);
     } else if (ast.type === 'only_combination') {
         return buildOnlyCombinationDFA(ast.alphabet);
+    } else if (ast.type === 'length_even') {
+        return buildLengthEvenDFA(alphabet);
+    } else if (ast.type === 'length_odd') {
+        return buildLengthOddDFA(alphabet);
+    } else if (ast.type === 'length_zero') {
+        return buildLengthZeroDFA(alphabet);
+    } else if (ast.type === 'length_one') {
+        return buildLengthOneDFA(alphabet);
+    } else if (ast.type === 'count_a_even') {
+        return buildCountAEvenDFA(alphabet);
+    } else if (ast.type === 'count_a_odd') {
+        return buildCountAOddDFA(alphabet);
+    } else if (ast.type === 'count_b_even') {
+        return buildCountBEvenDFA(alphabet);
+    } else if (ast.type === 'count_b_odd') {
+        return buildCountBOddDFA(alphabet);
+    } else if (ast.type === 'count_a_b_even') {
+        return buildCountABEvenDFA(alphabet);
     }
     return null;
 }
@@ -179,6 +281,195 @@ function buildOnlyCombinationDFA(alphabet) {
     return dfa;
 }
 
+// New functions for length and count conditions
+
+function buildLengthEvenDFA(alphabet) {
+    let dfa = {};
+    dfa["q0"] = {}; // even length
+    dfa["q1"] = {}; // odd length
+    dfa["qReject"] = {};
+    alphabet.forEach(c => {
+        dfa["q0"][c] = "q1";
+        dfa["q1"][c] = "q0";
+        dfa["qReject"][c] = "qReject";
+    });
+    dfa["q0"]["else"] = "qReject";
+    dfa["q1"]["else"] = "qReject";
+    dfa["qReject"]["else"] = "qReject";
+    dfa["q0"].accept = true;
+    return dfa;
+}
+
+function buildLengthOddDFA(alphabet) {
+    let dfa = {};
+    dfa["q0"] = {}; // even length
+    dfa["q1"] = {}; // odd length
+    dfa["qReject"] = {};
+    alphabet.forEach(c => {
+        dfa["q0"][c] = "q1";
+        dfa["q1"][c] = "q0";
+        dfa["qReject"][c] = "qReject";
+    });
+    dfa["q0"]["else"] = "qReject";
+    dfa["q1"]["else"] = "qReject";
+    dfa["qReject"]["else"] = "qReject";
+    dfa["q1"].accept = true;
+    return dfa;
+}
+
+function buildLengthZeroDFA(alphabet) {
+    let dfa = {};
+    dfa["q0"] = {};
+    dfa["qReject"] = {};
+    alphabet.forEach(c => {
+        dfa["q0"][c] = "qReject";
+        dfa["qReject"][c] = "qReject";
+    });
+    dfa["q0"]["else"] = "qReject";
+    dfa["qReject"]["else"] = "qReject";
+    dfa["q0"].accept = true;
+    return dfa;
+}
+
+function buildLengthOneDFA(alphabet) {
+    let dfa = {};
+    dfa["q0"] = {};
+    dfa["q1"] = {};
+    dfa["qReject"] = {};
+    alphabet.forEach(c => {
+        dfa["q0"][c] = "q1";
+        dfa["q1"][c] = "qReject";
+        dfa["qReject"][c] = "qReject";
+    });
+    dfa["q0"]["else"] = "qReject";
+    dfa["q1"]["else"] = "qReject";
+    dfa["qReject"]["else"] = "qReject";
+    dfa["q1"].accept = true;
+    return dfa;
+}
+
+function buildCountAEvenDFA(alphabet) {
+    let dfa = {};
+    dfa["q0"] = {}; // even count of a
+    dfa["q1"] = {}; // odd count of a
+    dfa["qReject"] = {};
+    alphabet.forEach(c => {
+        if (c === 'a') {
+            dfa["q0"][c] = "q1";
+            dfa["q1"][c] = "q0";
+        } else if (c === 'b') {
+            dfa["q0"][c] = "q0";
+            dfa["q1"][c] = "q1";
+        } else {
+            dfa["q0"][c] = "qReject";
+            dfa["q1"][c] = "qReject";
+        }
+        dfa["qReject"][c] = "qReject";
+    });
+    dfa["q0"]["else"] = "qReject";
+    dfa["q1"]["else"] = "qReject";
+    dfa["qReject"]["else"] = "qReject";
+    dfa["q0"].accept = true;
+    return dfa;
+}
+
+function buildCountAOddDFA(alphabet) {
+    let dfa = {};
+    dfa["q0"] = {}; // even count of a
+    dfa["q1"] = {}; // odd count of a
+    dfa["qReject"] = {};
+    alphabet.forEach(c => {
+        if (c === 'a') {
+            dfa["q0"][c] = "q1";
+            dfa["q1"][c] = "q0";
+        } else if (c === 'b') {
+            dfa["q0"][c] = "q0";
+            dfa["q1"][c] = "q1";
+        } else {
+            dfa["q0"][c] = "qReject";
+            dfa["q1"][c] = "qReject";
+        }
+        dfa["qReject"][c] = "qReject";
+    });
+    dfa["q0"]["else"] = "qReject";
+    dfa["q1"]["else"] = "qReject";
+    dfa["qReject"]["else"] = "qReject";
+    dfa["q1"].accept = true;
+    return dfa;
+}
+
+function buildCountBEvenDFA(alphabet) {
+    let dfa = {};
+    dfa["q0"] = {}; // even count of b
+    dfa["q1"] = {}; // odd count of b
+    dfa["qReject"] = {};
+    alphabet.forEach(c => {
+        if (c === 'b') {
+            dfa["q0"][c] = "q1";
+            dfa["q1"][c] = "q0";
+        } else if (c === 'a') {
+            dfa["q0"][c] = "q0";
+            dfa["q1"][c] = "q1";
+        } else {
+            dfa["q0"][c] = "qReject";
+            dfa["q1"][c] = "qReject";
+        }
+        dfa["qReject"][c] = "qReject";
+    });
+    dfa["q0"]["else"] = "qReject";
+    dfa["q1"]["else"] = "qReject";
+    dfa["qReject"]["else"] = "qReject";
+    dfa["q0"].accept = true;
+    return dfa;
+}
+
+function buildCountBOddDFA(alphabet) {
+    let dfa = {};
+    dfa["q0"] = {}; // even count of b
+    dfa["q1"] = {}; // odd count of b
+    dfa["qReject"] = {};
+    alphabet.forEach(c => {
+        if (c === 'b') {
+            dfa["q0"][c] = "q1";
+            dfa["q1"][c] = "q0";
+        } else if (c === 'a') {
+            dfa["q0"][c] = "q0";
+            dfa["q1"][c] = "q1";
+        } else {
+            dfa["q0"][c] = "qReject";
+            dfa["q1"][c] = "qReject";
+        }
+        dfa["qReject"][c] = "qReject";
+    });
+    dfa["q0"]["else"] = "qReject";
+    dfa["q1"]["else"] = "qReject";
+    dfa["qReject"]["else"] = "qReject";
+    dfa["q1"].accept = true;
+    return dfa;
+}
+
+function buildCountABEvenDFA(alphabet) {
+    let dfa = {};
+    dfa["q0"] = {}; // even count of a and b
+    dfa["q1"] = {}; // odd count of a and b
+    dfa["qReject"] = {};
+    alphabet.forEach(c => {
+        if (c === 'a' || c === 'b') {
+            dfa["q0"][c] = "q1";
+            dfa["q1"][c] = "q0";
+        } else {
+            dfa["q0"][c] = "qReject";
+            dfa["q1"][c] = "qReject";
+        }
+        dfa["qReject"][c] = "qReject";
+    });
+    dfa["q0"]["else"] = "qReject";
+    dfa["q1"]["else"] = "qReject";
+    dfa["qReject"]["else"] = "qReject";
+    dfa["q0"].accept = true;
+    return dfa;
+}
+
 //ANAS
 
 // Simulator: Tests a string against the DFA
@@ -230,10 +521,13 @@ function processPattern() {
     }
 
     const tokens = lexer(desc);
+    displayLexer(tokens);
+
     const ast = parser(tokens);
+    displayParser(ast);
 
     if (!ast) {
-        alert("Pattern not supported! Use: start with <string>, ends with <string>, contain <string>, only combination of <string>");
+        alert("Pattern not supported! Use: start with <string>, ends with <string>, contain <string>, only combination of <string>, length is even/odd/0/1, length of a is even/odd, length of b is even/odd, length of a and b is even, length will be even");
         return;
     }
 
@@ -248,6 +542,18 @@ function processPattern() {
     displayDFATable(dfa);
     displayNFATable(dfa); // Since DFA is NFA
     drawDFA(dfa);
+}
+
+function displayLexer(tokens) {
+    const output = tokens.length
+        ? tokens.map(token => `${token.type}: ${token.value}`).join('\n')
+        : 'No tokens generated.';
+    document.getElementById('lexerOutput').innerText = output;
+}
+
+function displayParser(ast) {
+    const output = ast ? JSON.stringify(ast, null, 2) : 'Invalid syntax or unsupported pattern.';
+    document.getElementById('parserOutput').innerText = output;
 }
 
 //ANAS
@@ -268,7 +574,19 @@ function simulate() {
         return;
     }
     // Determine allowed alphabet for notes (does not block path)
-    const alphabet = ast.type === 'only_combination' ? ast.alphabet : [...new Set(ast.string.split(''))];
+    let alphabet;
+    if (ast.type === 'only_combination') {
+        alphabet = ast.alphabet;
+    } else if (['count_a_even', 'count_a_odd', 'count_b_even', 'count_b_odd', 'count_a_b_even'].includes(ast.type)) {
+        alphabet = ['a', 'b'];
+    } else if (['length_even', 'length_odd', 'length_zero', 'length_one'].includes(ast.type)) {
+        alphabet = [];
+        for (let i = 32; i <= 126; i++) {
+            alphabet.push(String.fromCharCode(i));
+        }
+    } else {
+        alphabet = [...new Set(ast.string.split(''))];
+    }
     let invalidChars = [];
     for (let c of input) {
         if (!alphabet.includes(c)) {

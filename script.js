@@ -174,11 +174,15 @@ function parser(tokens) {
 //NAVEEN
 
 // Code Generator: Builds DFA from AST
-function codeGenerator(ast) {
+function codeGenerator(ast, customSigma) {
     if (!ast) return null;
 
     let alphabet;
-    if (ast.type === 'only_combination') {
+    
+    // If custom sigma is provided, use it
+    if (customSigma && customSigma.length > 0) {
+        alphabet = customSigma.split('');
+    } else if (ast.type === 'only_combination') {
         alphabet = ast.alphabet;
     } else if (['count_a_even', 'count_a_odd', 'count_b_even', 'count_b_odd', 'count_a_b_even', 'count_a_mod', 'count_b_mod', 'count_a_b_mod'].includes(ast.type)) {
         alphabet = ['a', 'b'];
@@ -652,6 +656,7 @@ function simulateWithPath(dfa, input) {
 // Processes pattern input and generates DFA with visualization
 function processPattern() {
     let desc = document.getElementById("patternInput").value.toLowerCase();
+    let sigmaInput = document.getElementById("sigmaInput").value.trim();
 
     if (!desc) {
         alert("Enter a pattern");
@@ -669,8 +674,8 @@ function processPattern() {
         return;
     }
 
-    // Code Generator
-    let dfa = codeGenerator(ast);
+    // Code Generator with optional custom sigma
+    let dfa = codeGenerator(ast, sigmaInput);
 
     if (!dfa) {
         alert("Failed to build DFA");
@@ -702,20 +707,23 @@ function displayParser(ast) {
 function simulate() {
     const input = document.getElementById("testInput").value;
     const desc = document.getElementById("patternInput").value.toLowerCase();
+    const sigmaInput = document.getElementById("sigmaInput").value.trim();
     const tokens = lexer(desc);
     const ast = parser(tokens);
     if (!ast) {
         document.getElementById("simulationOutput").innerText = "Invalid pattern";
         return;
     }
-    const dfa = codeGenerator(ast);
+    const dfa = codeGenerator(ast, sigmaInput);
     if (!dfa) {
         document.getElementById("simulationOutput").innerText = "Failed to build DFA";
         return;
     }
     // Determine allowed alphabet for notes (does not block path)
     let alphabet;
-    if (ast.type === 'only_combination') {
+    if (sigmaInput && sigmaInput.length > 0) {
+        alphabet = sigmaInput.split('');
+    } else if (ast.type === 'only_combination') {
         alphabet = ast.alphabet;
     } else if (['count_a_even', 'count_a_odd', 'count_b_even', 'count_b_odd', 'count_a_b_even', 'count_a_mod', 'count_b_mod', 'count_a_b_mod'].includes(ast.type)) {
         alphabet = ['a', 'b'];

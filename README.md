@@ -23,10 +23,33 @@ Think of it like a flowchart that processes text character by character to decid
 ## Quick Start
 
 1. **Open the Application**: Open `index.html` in any modern web browser
-2. **Enter a Pattern**: Type a pattern description in the input field
-3. **Generate DFA**: Click "Generate DFA" to create the automaton
-4. **Test Strings**: Enter test strings and click "Test String" to see if they match
-5. **Explore**: Use the visual diagram and tables to understand how it works
+2. **Define Sigma (Optional)**: Enter the alphabet characters in the "Define Sigma" field (e.g., "abc", "01", "xyz")
+   - If left empty, the alphabet is auto-detected from the pattern
+   - If specified, only these characters are allowed in the DFA
+3. **Enter a Pattern**: Type a pattern description in the input field
+4. **Generate DFA**: Click "Generate DFA" to create the automaton
+5. **Test Strings**: Enter test strings and click "Test String" to see if they match
+6. **Explore**: Use the visual diagram and tables to understand how it works
+
+## Custom Alphabet (Sigma)
+
+You can optionally define a custom alphabet (sigma) for your DFA:
+- **Format**: Enter characters without spaces (e.g., "abc", "01", "xyz")
+- **Purpose**: Restricts the input alphabet to only the specified characters
+- **Example**: If you define sigma as "01", the DFA will only process binary strings
+- **Auto-Detection**: If left empty, the alphabet is automatically derived from your pattern
+
+### Sigma Examples
+```
+Pattern: start with hello
+Sigma: (empty) → Auto-detects {h, e, l, o}
+
+Pattern: start with 10
+Sigma: 01 → Only binary strings allowed
+
+Pattern: length is even
+Sigma: abc → Only strings with characters a, b, c
+```
 
 ## Supported Patterns
 

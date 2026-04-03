@@ -1,53 +1,59 @@
 <!--NEGI-->
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic DFA Generator</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
-    <h1>Dynamic DFA Generator</h1>
+    <h1>🔄 Dynamic DFA Generator</h1>
+    <p style="font-size: 1.1em; color: #00c6ff; margin-bottom: 30px; opacity: 0.9;">Build and visualize Deterministic Finite Automata instantly</p>
 
-    <input type="text" id="patternInput" placeholder="Enter pattern (start with abc, ends with 123, contain xyz, only combination of abc)">
-    <button onclick="processPattern()">Generate DFA</button>
+    <div style="background: rgba(0, 198, 255, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 30px; border: 1px solid rgba(0, 198, 255, 0.3);">
+        <input type="text" id="patternInput" placeholder="📝 Enter pattern (e.g., start with abc, ends with 123, contain xyz)">
+        <input type="text" id="sigmaInput" placeholder="⚙️ Define Sigma (alphabet) - e.g., abc, 01, xyz (optional)">
+        <button onclick="processPattern()">✨ Generate DFA</button>
+    </div>
 
     <div id="lexerSection">
-        <h2>Lexer Output</h2>
+        <h2>📋 Lexer Output</h2>
         <pre id="lexerOutput">No tokens yet.</pre>
     </div>
 
     <div id="parserSection">
-        <h2>Parser Output</h2>
+        <h2>🌳 Parser Output (AST)</h2>
         <pre id="parserOutput">No AST yet.</pre>
     </div>
 
     <div id="dfaSection">
-        <h2>DFA Transition Table</h2>
+        <h2>📊 DFA Transition Table</h2>
         <div id="dfaTable"></div>
     </div>
 
     <div id="nfaSection">
-        <h2>NFA Transition Table</h2>
+        <h2>📊 NFA Transition Table</h2>
         <div id="nfaTable"></div>
     </div>
 
     <div id="diagramSection">
-        <h2>DFA Diagram</h2>
-        <canvas id="dfaCanvas"></canvas>
+        <h2>🎨 DFA Diagram</h2>
+        <canvas id="dfaCanvas" width="900" height="600"></canvas>
     </div>
 
     <div id="simulationSection">
-        <h2>Simulation</h2>
-        <input type="text" id="testInput" placeholder="Enter string to test">
-        <button onclick="simulate()">Test String</button>
+        <h2>🧪 Simulation & Testing</h2>
+        <input type="text" id="testInput" placeholder="🔤 Enter string to test">
+        <button onclick="simulate()">▶️ Test String</button>
         <div id="simulationOutput"></div>
         <div id="simulationSteps"></div>
         <div id="simulatedDFASection">
-            <h3>Simulated DFA Path</h3>
-            <canvas id="simulatedDFACanvas"></canvas>
+            <h3>📍 Simulated DFA Path</h3>
+            <canvas id="simulatedDFACanvas" width="900" height="600"></canvas>
         </div>
     </div>
 </div>
